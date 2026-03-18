@@ -2,6 +2,9 @@ package com.example.weatherapp.controllers;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.example.weatherapp.entity.Weather;
+import com.example.weatherapp.services.WeatherService;
+
 @RestController
 @RequestMapping("/weather")
 public class WeatherController {
