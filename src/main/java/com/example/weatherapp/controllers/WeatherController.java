@@ -2,7 +2,7 @@ package com.example.weatherapp.controllers;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.example.weatherapp.entity.Weather;
+import com.example.weatherapp.dto.WeatherDTO;
 import com.example.weatherapp.services.WeatherService;
 
 @RestController
@@ -16,9 +16,9 @@ public class WeatherController {
     }
 
     @GetMapping
-    public Weather getWeather(
-        @RequestParam double lat,
-        @RequestParam double lon
+    public WeatherDTO getWeather(
+            @RequestParam double lat,
+            @RequestParam double lon
     ) {
         return weatherService.getWeather(lat, lon);
     }
