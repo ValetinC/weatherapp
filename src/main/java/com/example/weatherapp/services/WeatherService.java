@@ -1,14 +1,14 @@
 package com.example.weatherapp.services;
 
-import com.example.weatherapp.entity.Weather;
-import com.example.weatherapp.entity.Location;
-import com.example.weatherapp.repository.weatherRepository;
-import com.example.weatherapp.repository.locationRepository;
+import com.example.weatherapp.entity.*;
+import com.example.weatherapp.repository.*;
 import com.example.weatherapp.clients.WeatherAPIClient;
-import com.example.weatherapp.dto.WeatherDTO;
 
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class WeatherService {
@@ -25,28 +25,29 @@ public class WeatherService {
         this.locationRepository = locationRepository;
     }
 
-    public WeatherDTO getWeather(double lat, double lon) {
+    // ✅ CREATE (con rango de fechas)
+    public List<Weather> createWeather(String city, LocalDate start, LocalDate end) {
 
-        // 🔹 Validación
-        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-            throw new IllegalArgumentException("Coordenadas inválidas");
+        if (start.isAfter(end)) {
+            throw new RuntimeException("La fecha de inicio no puede ser mayor a la final");
         }
 
-        System.out.println("Consultando clima para: " + lat + ", " + lon);
+        // (Simplificado: lat/lon fijo, luego podés usar API de geocoding)
+        
+        Location location = new Location();
+        location.setCity(city);
+        
+        Location savedLocation = locationRepository.save(location);
 
-        try {
-            String response = apiClient.getWeather(lat, lon);
+        List<Weather> result = new java.util.ArrayList<>();
+
+        LocalDate current = start;
+
+        while (!current.isAfter(end)) {
+
+            String response = apiClient.getWeather(city);
             JSONObject json = new JSONObject(response);
 
-            // 🔹 Guardar ubicación
-            Location location = new Location();
-            location.setLatitude(lat);
-            location.setLongitude(lon);
-            location.setTimestamp(System.currentTimeMillis());
-
-            Location savedLocation = locationRepository.save(location);
-
-            // 🔹 Guardar clima
             Weather weather = new Weather();
             weather.setTemperature(json.getJSONObject("main").getDouble("temp"));
             weather.setFeelsLike(json.getJSONObject("main").getDouble("feels_like"));
@@ -54,26 +55,50 @@ public class WeatherService {
             weather.setPressure(json.getJSONObject("main").getInt("pressure"));
             weather.setDescription(
                     json.getJSONArray("weather")
-                        .getJSONObject(0)
-                        .getString("description")
+                            .getJSONObject(0)
+                            .getString("description")
             );
             weather.setWindSpeed(json.getJSONObject("wind").getDouble("speed"));
-            weather.setTimestamp(System.currentTimeMillis());
+            weather.setDate(current);
             weather.setLocation(savedLocation);
 
-            weatherRepository.save(weather);
+            result.add(weatherRepository.save(weather));
 
-            // 🔹 Retornar DTO (NO entidad)
-            return new WeatherDTO(
-                    weather.getTemperature(),
-                    weather.getFeelsLike(),
-                    weather.getHumidity(),
-                    weather.getDescription(),
-                    weather.getWindSpeed()
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error procesando datos del clima");
+            current = current.plusDays(1);
         }
+
+        return result;
+    }
+
+    // ✅ READ
+    public List<Weather> getAllWeather() {
+        return weatherRepository.findAll();
+    }
+
+    public Weather getWeatherById(Long id) {
+        return weatherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No encontrado"));
+    }
+
+    public List<Weather> getByDateRange(LocalDate start, LocalDate end) {
+        return weatherRepository.findByDateBetween(start, end);
+    }
+
+    // ✅ UPDATE
+    public Weather updateWeather(Long id, Weather updated) {
+
+        Weather weather = weatherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No encontrado"));
+
+        weather.setTemperature(updated.getTemperature());
+        weather.setDescription(updated.getDescription());
+        weather.setHumidity(updated.getHumidity());
+
+        return weatherRepository.save(weather);
+    }
+
+    // ✅ DELETE
+    public void deleteWeather(Long id) {
+        weatherRepository.deleteById(id);
     }
 }

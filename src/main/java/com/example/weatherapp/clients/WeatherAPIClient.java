@@ -18,9 +18,9 @@ public class WeatherAPIClient {
         this.restTemplate = new RestTemplate();
     }
 
-    public String getWeather(double lat, double lon) {
+    public String getWeather(String city) {
         try {
-            String url = BASE_URL + "?lat=" + lat + "&lon=" + lon +
+            String url = BASE_URL + "?q=" + city +
                          "&appid=" + apiKey + "&units=metric";
 
             return restTemplate.getForObject(url, String.class);

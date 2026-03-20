@@ -1,5 +1,7 @@
 package com.example.weatherapp.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,7 +19,7 @@ public class Weather {
     private double windSpeed;
     private String description;
 
-    private long timestamp;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
@@ -79,12 +81,12 @@ public class Weather {
         this.description = description;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public Location getLocation() {
