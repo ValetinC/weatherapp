@@ -1,0 +1,5 @@
+Name: Valentin Nicolas Caselli Seippel
+Career: Computer Engineering
+University: UADE
+LinkedIn: linkedin.com/in/valentin-nicolas-caselli-seippel-0967243b5/
+Tecnologies: Java / Springboot, MySQL, OpenWeather
